@@ -44,7 +44,6 @@ public final class Main extends JavaPlugin {
         ms = System.currentTimeMillis()-ms;
         console(" &aPlugin correctly loaded in "+ms+" ms.",
                 "&f&m ======================================================== ");
-
     }
 
     boolean managers(){
@@ -81,10 +80,9 @@ public final class Main extends JavaPlugin {
         console(
                 "  &c⚠ Error:",
                 "    &cClass: "+e.getClass().getCanonicalName(),
-                "    &cCause: "+e.getCause().getLocalizedMessage(),
                 "",
-                "    &cContact with &bTheJokerDev&c and give this link:",
-                "    &cFull error: "+hastebin.paste(e.toString()),
+                "    &cContact with &bTheJokerDev&c and give to him this link:",
+                "    &cFull error: "+hastebin.paste(e.getStackTrace().toString()),
                 ""
         );
     }

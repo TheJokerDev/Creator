@@ -31,12 +31,12 @@ public class PlayerManager implements Listener {
         players.put(p.getName(), player);
         playersUUID.put(p.getUniqueId(), player);
 
-        Bukkit.getScheduler().runTaskAsynchronously(plugin, new BukkitRunnable() {
+        new BukkitRunnable() {
             @Override
             public void run() {
                 plugin.getDataManager().getData().getData(player);
             }
-        });
+        }.runTaskAsynchronously(plugin);
     }
 
     public CPlayer getPlayer(Player p){
@@ -47,12 +47,12 @@ public class PlayerManager implements Listener {
     public void onLeave(PlayerQuitEvent e){
         Player p = e.getPlayer();
         CPlayer player = getPlayer(p);
-        Bukkit.getScheduler().runTaskAsynchronously(plugin, new BukkitRunnable() {
+        new BukkitRunnable() {
             @Override
             public void run() {
                 plugin.getDataManager().getData().syncData(player);
             }
-        });
+        }.runTaskAsynchronously(plugin);
 
         players.remove(p.getName());
         playersUUID.remove(p.getUniqueId());

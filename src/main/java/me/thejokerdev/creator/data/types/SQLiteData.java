@@ -34,33 +34,58 @@ public class SQLiteData extends Data {
 
     @Override
     public void syncData(CPlayer var) {
-        ResultSet rs = getResult("SELECT * FROM "+table_users+" WHERE uuid = '"+ var.getUniqueId() +"';");
+        PreparedStatement st = null;
+        try {
+            st = connection.prepareStatement("UPDATE "+table_users+" SET uuid=?, date=?, interacted=? WHERE uuid=?");
 
-        if(rs != null) {
-            update("UPDATE "+table_users+" SET interacted='"+var.isInteracted()+"', date='"+var.getDateOfInteraction()+"' WHERE uuid='"+var.getUniqueId()+"';");
-        } else {
-            update("INSERT INTO "+table_users+" (UUID, firstJoin, lang) VALUES('"+var.getUniqueId()+"', '"+var.isInteracted()+"', '"+var.getDateOfInteraction()+"');");
+            st.setString(1, var.getUniqueId().toString());
+            st.setString(2, var.getDateOfInteraction().toString());
+            st.setBoolean(3, var.isInteracted());
+            st.setString(4, var.getUniqueId().toString());
+            st.executeUpdate();
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        } finally {
+            close(st);
         }
     }
 
     @Override
     public void getData(CPlayer var) {
-        ResultSet rs = getResult("SELECT * FROM "+table_users+" WHERE uuid = '"+ var.getUniqueId() +"';");
-
-        if(rs == null) {
-            var.setInteracted(false);
-            var.setDateOfInteraction(null);
-            return;
-        }
+        PreparedStatement st = null;
+        ResultSet rs = null;
 
         try {
-            var.setDateOfInteraction(new Date(rs.getString("date")));
-            var.setInteracted(rs.getBoolean("interacted"));
+            st = connection.prepareStatement("SELECT * FROM "+table_users+" WHERE uuid=?");
+            st.setString(1, var.getUniqueId().toString());
+            rs = st.executeQuery();
+            if (rs.next()){
+                String date = rs.getString("lang");
+                var.setDateOfInteraction(date.isEmpty() ? null : new Date(date));
+                var.setInteracted(rs.getBoolean("interacted"));
+            } else{
+                rs.close();
+                st.close();
+
+                st = connection.prepareStatement("INSERT INTO "+table_users+" (uuid) VALUES (?)");
+                st.setString(1, var.getUniqueId().toString());
+                st.executeUpdate();
+            }
         } catch (SQLException e) {
-            plugin.error(e);
-            var.setInteracted(false);
-            var.setDateOfInteraction(null);
+            e.printStackTrace();
+        } finally {
+            close(rs);
+            close(st);
         }
+    }
+    public static void close(AutoCloseable var1) {
+        if (var1 != null) {
+            try {
+                var1.close();
+            } catch (Exception ignored) {
+            }
+        }
+
     }
 
     @Override
@@ -148,7 +173,7 @@ public class SQLiteData extends Data {
     public ResultSet getResult(final String qry) {
         if (this.isConnected()) {
             try {
-                final FutureTask<ResultSet> task = new FutureTask<>(new Callable<ResultSet>() {
+                final FutureTask<ResultSet> task = new FutureTask<>(new Callable<>() {
                     PreparedStatement ps;
 
                     @Override

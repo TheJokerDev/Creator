@@ -13,13 +13,8 @@ public class CPlayer {
     private String name;
     private UUID uniqueId;
 
-    private boolean interacted;
-    private Date dateOfInteraction;
-
-    public CPlayer(String name, UUID uniqueId){
-        this.name = name;
-        this.uniqueId = uniqueId;
-    }
+    private boolean interacted = false;
+    private Date dateOfInteraction = null;
 
     public CPlayer(Player player){
         name = player.getName();
