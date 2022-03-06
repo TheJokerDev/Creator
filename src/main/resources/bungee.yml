@@ -1,0 +1,4 @@
+name: CreatorBungee
+main: me.thejokerdev.creator.Bungee
+version: ${project.version}
+author: TheJokerDev

@@ -1,0 +1,7 @@
+name: Creator
+version: '${project.version}'
+main: me.thejokerdev.creator.Main
+api-version: 1.18
+authors: [ TheJokerDev ]
+description: Gives support to your favorite media creator.
+website: twitch.tv/TheJokerDev

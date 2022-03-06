@@ -1,0 +1,12 @@
+general:
+  onlyPlayers: '{prefix}&c¡Este comando es solo para jugadores!'
+  noPermissions: '{prefix}&c¡No tienes permisos para ejecutar este comando!'
+
+
+cmd:
+  main:
+    help: |-
+      {center}&b&lCreator &e⁎ &fAyuda
+      &a
+      &e › &7/creator &f- &bAbre el menú.
+      &e

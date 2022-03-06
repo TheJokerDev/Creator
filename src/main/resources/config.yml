@@ -1,0 +1,21 @@
+settings:
+  debug: false
+  prefix: '&7▸ '
+  lang: es_MX
+  data:
+    type: sqlite #Availables (SQLite, MySQL, MariaDB, MongoDB, Yaml)
+    mysql:
+      host: localhost:3306 #You can specify the port, default is 3306.
+      database: creator
+      user: root
+      password: pass123
+      tables:
+        user: USER_DATA
+        creators: CREATOR_DATA
+    yaml:
+      file: 'database.yml'
+    sqlite:
+      file: 'database.db'
+    mongodb:
+      uri: 'mongodb://mongodb0.creator.net:27017' #Change this to your uri.
+
