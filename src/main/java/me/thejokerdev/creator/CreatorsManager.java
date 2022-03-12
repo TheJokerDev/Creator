@@ -13,5 +13,12 @@ public class CreatorsManager {
     public void init(){
         creators = new HashMap<>();
 
+        for (String s : plugin.getDataManager().getData().getCreators()){
+            creators.put(s, new Creator(s));
+        }
+
+        for (Creator c : creators.values()){
+            c.loadData(true);
+        }
     }
 }

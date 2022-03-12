@@ -1,5 +1,6 @@
 package me.thejokerdev.creator.data.types;
 
+import me.thejokerdev.creator.Creator;
 import me.thejokerdev.creator.Main;
 import me.thejokerdev.creator.data.Data;
 import me.thejokerdev.creator.data.DataType;
@@ -8,7 +9,9 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 
 import java.sql.*;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
@@ -66,7 +69,7 @@ public class MySQLData extends Data {
             st.setString(1, var.getUniqueId().toString());
             rs = st.executeQuery();
             if (rs.next()){
-                String date = rs.getString("lang");
+                String date = rs.getString("date");
                 var.setDateOfInteraction(date.isEmpty() ? null : new Date(date));
                 var.setInteracted(rs.getBoolean("interacted"));
             } else{
@@ -83,6 +86,77 @@ public class MySQLData extends Data {
             close(rs);
             close(st);
         }
+    }
+
+    @Override
+    public void syncCData(Creator var) {
+        PreparedStatement st = null;
+        try {
+            st = connection.prepareStatement("UPDATE "+table_creators+" SET uuid=?, lastVote=?, votes=? WHERE uuid=?");
+
+            st.setString(1, var.getName());
+            st.setString(2, var.getLastVote().toString());
+            st.setInt(3, var.getVotes());
+            st.setString(4, var.getName());
+            st.executeUpdate();
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        } finally {
+            close(st);
+        }
+    }
+
+    @Override
+    public void getCData(Creator var) {
+        PreparedStatement st = null;
+        ResultSet rs = null;
+
+        try {
+            st = connection.prepareStatement("SELECT * FROM "+table_creators+" WHERE uuid=?");
+            st.setString(1, var.getName().toString());
+            rs = st.executeQuery();
+            if (rs.next()){
+                String date = rs.getString("lastVote");
+                var.setLastVote(date.isEmpty() ? null : new Date(date));
+                var.setVotes(rs.getInt("votes"));
+            } else{
+                rs.close();
+                st.close();
+
+                st = connection.prepareStatement("INSERT INTO "+table_creators+" (uuid) VALUES (?)");
+                st.setString(1, var.getName());
+                st.executeUpdate();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            close(rs);
+            close(st);
+        }
+    }
+
+    @Override
+    public List<String> getCreators() {
+        List<String> creators = new ArrayList<>();
+        PreparedStatement st = null;
+        ResultSet rs = null;
+
+        try {
+            st = connection.prepareStatement("SELECT * FROM "+table_creators);
+            rs = st.executeQuery();
+            if (rs.next()){
+                creators.add(rs.getString("uuid"));
+            } else{
+                rs.close();
+                st.close();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            close(rs);
+            close(st);
+        }
+        return creators;
     }
 
     public static void close(AutoCloseable var1) {
@@ -128,9 +202,15 @@ public class MySQLData extends Data {
         this.password = section.getString("password");
         this.connect();
         String query = "CREATE TABLE IF NOT EXISTS "+table_users+" (" +
-                "UUID varchar(64) NOT NULL, " +
+                "uuid varchar(64) NOT NULL, " +
                 "interacted BOOLEAN DEFAULT TRUE," +
                 "date varchar(32) DEFAULT ''"+
+                ");";
+        this.update(query);
+        query = "CREATE TABLE IF NOT EXISTS "+table_creators+" (" +
+                "uuid varchar(64) NOT NULL, " +
+                "votes INT(6) DEFAULT '0', " +
+                "lastVote varchar(32) DEFAULT ''"+
                 ");";
         this.update(query);
         running = true;

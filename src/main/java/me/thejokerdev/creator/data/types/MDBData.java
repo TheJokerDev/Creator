@@ -5,11 +5,15 @@ import com.mongodb.MongoClientURI;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Filters;
+import me.thejokerdev.creator.Creator;
 import me.thejokerdev.creator.Main;
 import me.thejokerdev.creator.data.Data;
 import me.thejokerdev.creator.data.DataType;
 import me.thejokerdev.creator.player.CPlayer;
 import org.bson.Document;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class MDBData extends Data {
 
@@ -56,6 +60,43 @@ public class MDBData extends Data {
     }
 
     @Override
+    public void syncCData(Creator var) {
+        Document newDocument = new Document("uuid", var.getName())
+                .append("votes", var.getVotes())
+                .append("lastVote", var.getLastVote());
+
+        Document document = this.creatorsCollection.find(Filters.eq("uuid", var.getName())).first();
+
+        if(document == null || document.isEmpty()) {
+            this.creatorsCollection.insertOne(newDocument);
+        } else {
+            this.creatorsCollection.findOneAndReplace(Filters.eq("uuid", var.getName()), newDocument);
+        }
+    }
+
+    @Override
+    public void getCData(Creator var) {
+        Document document = this.creatorsCollection.find(Filters.eq("uuid", var.getName())).first();
+
+        if(document == null) {
+            return;
+        }
+
+        var.setVotes(document.getInteger("votes"));
+        var.setLastVote(document.getDate("lastVote"));
+    }
+
+    @Override
+    public List<String> getCreators() {
+        MongoCollection<Document> documents = creatorsCollection;
+        List<String> creators = new ArrayList<>();
+        for (Document d : documents.listIndexes()){
+            creators.add(d.getString("uuid"));
+        }
+        return creators;
+    }
+
+    @Override
     public void reload() {
 
     }
@@ -80,6 +121,7 @@ public class MDBData extends Data {
             MongoDatabase database = client.getDatabase("TheJokerDev_"+plugin.getDescription().getName());
 
             this.playerCollection = database.getCollection("players");
+            this.creatorsCollection = database.getCollection("creators");
             running = true;
         } catch (Exception ex) {
             ex.printStackTrace();
