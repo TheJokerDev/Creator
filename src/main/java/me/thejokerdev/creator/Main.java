@@ -6,15 +6,19 @@ import lombok.Getter;
 import lombok.Setter;
 import me.thejokerdev.creator.data.DataManager;
 import me.thejokerdev.creator.lang.LangManager;
+import me.thejokerdev.creator.menus.MenuListener;
 import me.thejokerdev.creator.player.PlayerManager;
 import me.thejokerdev.creator.utils.Hastebin;
 import me.thejokerdev.creator.utils.Utils;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.plugin.messaging.PluginMessageListener;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 @Getter
 @Setter
@@ -24,6 +28,8 @@ public final class Main extends JavaPlugin implements PluginMessageListener {
     private DataManager dataManager;
     private PlayerManager playerManager;
     private CreatorsManager creatorManager;
+
+    private List<String> pluginMSG = new ArrayList<>();
 
     private Hastebin hastebin;
 
@@ -45,16 +51,23 @@ public final class Main extends JavaPlugin implements PluginMessageListener {
         }
 
         checkIfBungee();
-        if ( !getServer().getPluginManager().isPluginEnabled( this ) )
-        {
+        PluginManager pm = getServer().getPluginManager();
+        if (!pm.isPluginEnabled(this)) {
             return;
         }
-        getServer().getMessenger().registerIncomingPluginChannel( this, "Creators:messages", this );
 
+        pm.registerEvents(new MenuListener(), this);
+
+        getServer().getMessenger().registerOutgoingPluginChannel(this, "BungeeCord");
+        getServer().getMessenger().registerIncomingPluginChannel( this, "Creators:messages", this );
 
         ms = System.currentTimeMillis()-ms;
         console(" &aPlugin correctly loaded in "+ms+" ms.",
                 "&f&m ======================================================== ");
+    }
+
+    public static Main getPlugin() {
+        return plugin;
     }
 
     private void checkIfBungee()
@@ -78,12 +91,24 @@ public final class Main extends JavaPlugin implements PluginMessageListener {
         }
         ByteArrayDataInput in = ByteStreams.newDataInput( bytes );
         String subChannel = in.readUTF();
-        if ( subChannel.equalsIgnoreCase( "MySubChannel" ) )
+        if ( subChannel.equalsIgnoreCase( "Update" ) )
         {
-            String data1 = in.readUTF();
-            int data2 = in.readInt();
+            String data = in.readUTF();
+            String[] split = data.split("`");
+            String example = "2b733549-d2cc-40f0-b7f3-9bfa9f3c1b89`TheJokerDev`1`Sat Mar 12 22:21:12 CST 2022";
+            if (split.length == 4){
+                String uuid = split[0];
+                if (pluginMSG.contains(uuid)){
+                    pluginMSG.remove(uuid);
+                    return;
+                }
 
-            // do things with the data
+                String creator = split[1];
+                int votes = Integer.parseInt(split[2]);
+                String date = split[3];
+
+                creatorManager.updateCreator(creator, votes, date);
+            }
         }
     }
 

@@ -1,0 +1,67 @@
+settings:
+  title: '         Creator''s Menu         '
+  rows: 5
+  update:
+    enabled: true
+    delay: 20
+
+items:
+  creator:
+    material: player_head
+    skull: 'name-{creator}'
+    meta:
+      name: '&b• &e&l{creator}'
+      lore:
+        - ''
+        - '&7 Click para votar por &b&n{creator}'
+        - ''
+        - '&7 Votos: &e{votes}'
+        - '&7 Último voto: {lastVote}'
+        - ''
+  next_page:
+    material: player_head
+    skull: 'name-MHF_ArrowRight'
+    slot: 26
+    meta:
+      name: '&aSiguiente &e»'
+      lore:
+        - ''
+        - '&7 Click para ir a la'
+        - '&7 siguiente página.'
+        - ''
+  prev_page:
+    material: player_head
+    skull: 'name-MHF_ArrowLeft'
+    slot: 18
+    meta:
+      name: '&e« &aAnterior'
+      lore:
+        - ''
+        - '&7 Click para ir a la'
+        - '&7 anterior página.'
+        - ''
+  anyCreator:
+    material: red_stained_glass_pane
+    slot: 22
+    meta:
+      name: '&c¡Ups!'
+      lore:
+        - ''
+        - ' &7Parece que no hay ningún creador :c'
+        - ''
+    actions:
+      multiclick: '[close]'
+
+extra-items:
+  close:
+    material: barrier
+    slot: 40
+    meta:
+      name: '&cCerrar'
+      lore:
+        - ''
+        - '&7 Click para cerrar'
+        - '&7 este menú.'
+        - ''
+    actions:
+      multiclick: '[close]'

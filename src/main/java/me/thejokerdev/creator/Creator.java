@@ -4,7 +4,6 @@ import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.scheduler.BukkitRunnable;
 
-import java.security.cert.CertificateParsingException;
 import java.util.Date;
 
 @Getter
@@ -19,6 +18,12 @@ public class Creator {
         this.name = name;
         votes = 0;
         lastVote = new Date();
+    }
+
+    public void addVote(){
+        lastVote = new Date();
+        votes++;
+        syncData(true);
     }
 
     public Creator(String name, Main plugin){
@@ -53,4 +58,14 @@ public class Creator {
         }
     }
 
+    public void sendMSG(){
+
+    }
+
+    public String toString(String uuid) {
+        return uuid +
+                "`" + name + "`" +
+                votes +
+                "`" + lastVote.toString();
+    }
 }
